@@ -3,8 +3,8 @@
 const map = new maplibregl.Map({
 container: 'map', 
 style: 'https://www.carbon.place/pmtiles/style_pbcc_mb.json',
-center: [0, 52], 
-zoom: 6,
+center: [-3.2883, 55.9924], 
+zoom: 7,
 maxZoom: 18,
 minZoom: 6,
 attributionControl: false,
@@ -45,7 +45,7 @@ map.addSource('rnet', {
 	'https://www.wisemover.co.uk/tiles/rnet/{z}/{x}/{y}.pbf'
 	],
 	'minzoom': 6,
-	'maxzoom': 14
+	'maxzoom': 13
 });
 
 map.addSource('terrainSource', {
@@ -77,7 +77,7 @@ map.addLayer({
             'id': 'rnet',
             'type': 'line',
             'source': 'rnet',
-            'source-layer': 'rnet',
+            'source-layer': 'pct',
             'paint': {
               'line-color': ["step",["get","bicycle"],
               "rgba(0,0,0,0)",
