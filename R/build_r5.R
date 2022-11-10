@@ -1,5 +1,5 @@
 Sys.setenv(JAVA_HOME = "C:/Program Files/Java/jdk-11.0.13/")
-.jinit()
+#.jinit()
 options(java.parameters = "-Xmx80G")
 library(r5r)
 
