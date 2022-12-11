@@ -10,17 +10,18 @@ tmap_mode("view")
 path_data = "D:/OneDrive - University of Leeds/Data/opentripplanner"
 path_opt = "D:/OneDrive - University of Leeds/Data/opentripplanner/otp-1.5.0-shaded.jar"
 
-log2 = otp_setup(path_opt,
-                 path_data,
-                 router = "great-britain-NTEM",
-                 port = 8091,
-                 securePort = 8092,
-                 analyst = TRUE,
-                 memory = 80000,
-                 quiet = FALSE,
-                 wait = FALSE)
+# log2 = otp_setup(path_opt,
+#                  path_data,
+#                  router = "great-britain-NTEM",
+#                  port = 8091,
+#                  securePort = 8092,
+#                  analyst = TRUE,
+#                  memory = 80000,
+#                  quiet = FALSE,
+#                  wait = FALSE)
 
-otpcon <- otp_connect(router = "great-britain-NTEM", port = 8091)
+otpcon <- otp_connect(router = "default", port = 8091, otp_version = 2)
+otpcon$otp_version <- 2
 
 dl <- readRDS("C:/Users/earmmor/Downloads/desire_lines_scotland.Rds")
 summary(dl$dist_euclidean)
@@ -35,17 +36,50 @@ toPlace <- st_as_sf(data.frame(id = dl$geo_code2, geometry = toPlace))
 summary(st_is_valid(fromPlace))
 summary(st_is_valid(toPlace))
 
+fromPlace = fromPlace[1:10000,]
+toPlace = toPlace[1:10000,]
+
+
+message(Sys.time())
 routes_part <- otp_plan(otpcon,
                         fromPlace = fromPlace,
                         toPlace = toPlace,
                         fromID = fromPlace$id,
                         toID = toPlace$id,
                         mode = c("BICYCLE"),
-                        ncores = 1,
-                        distance_balance = FALSE)
+                        ncores = 44,
+                        distance_balance = TRUE)
+
+requuests <- data.frame(fromPlace = fromPlace$id, toPlace = toPlace$id)
+requuests <- dplyr::left_join(requuests, routes_part, by = c("fromPlace", "toPlace"))
+
+req_missing <- requuests[is.na(requuests$duration),]
+req_missing <- req_missing[,1:2]
+req_missing <- req_missing[req_missing$fromPlace != req_missing$toPlace,]
+
+req_missing <- dplyr::left_join(req_missing, dl, by = c("fromPlace" = "geo_code1", "toPlace" = "geo_code2"))
+req_missing <- st_as_sf(req_missing)
+
+message(Sys.time())
+
+routes_part <- otp_plan(otpcon,
+                        fromPlace = fromPlace[1:10,],
+                        toPlace = toPlace[1:10,],
+                        mode = c("BICYCLE"),
+                        ncores = 44)
 
 
+toPlace <- toPlace[1:100,]
+fromPlace <- fromPlace[1:100,]
 
+routes_tst <- otp_plan(otpcon,
+                        fromPlace = fromPlace,
+                        toPlace = toPlace,
+                        fromID = fromPlace$id,
+                        toID = toPlace$id,
+                        mode = c("BICYCLE"),
+                        ncores = 44,
+                        distance_balance = TRUE)
 
 
 
